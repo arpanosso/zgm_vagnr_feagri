@@ -5,7 +5,17 @@ date: "12/03/2021"
 output: html_document
 ---
 
-# Entrada de dados
+# Carregando Pacotes
 
-# Análise
+```{r, message=FALSE}
+library(readxl)
+library(tidyverse)
+```
+
+
+# Entrada de dados
+```{r}
+dados_gerais <- read_excel("https://github.com/arpanosso/zgm_vagnr_feagri/blob/main/dados/Dados_gerais_para_R_vagner.xlsx")
+View(Dados_gerais_para_R_vagner)
+```
 
