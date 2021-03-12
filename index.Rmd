@@ -1,0 +1,11 @@
+---
+title: "Análise Feagri - Vagner & Zigomar"
+author: "Alan R Panosso"
+date: "12/03/2021"
+output: html_document
+---
+
+# Entrada de dados
+
+# Análise
+
