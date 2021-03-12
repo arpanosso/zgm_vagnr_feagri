@@ -14,8 +14,13 @@ library(tidyverse)
 
 # Entrada de dados
 ```{r}
-dados_gerais <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Dados_gerais.txt",
-                           na.strings = "")
-View(Dados_gerais_para_R_vagner)
+dados <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Dados_gerais.txt",
+                           h=TRUE,
+                           na.strings = "",
+                           sep="\t")
+head(dados)
 ```
+
+# Validação de dados  
+## Análise de estatística descritiva  
 
