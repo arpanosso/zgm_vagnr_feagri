@@ -17,10 +17,44 @@ library(tidyverse)
 dados <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Dados_gerais.txt",
                            h=TRUE,
                            na.strings = "",
-                           sep="\t")
-head(dados)
+                           sep="\t",
+                           stringsAsFactors = TRUE)
+glimpse(dados)
 ```
 
 # Validação de dados  
 ## Análise de estatística descritiva  
+
+```{r}
+# criando função para estatística descritiva
+estat_desc <- function(x){
+  x<-na.omit(x)
+  media <- mean(x)
+  mediana <- median(x)
+  dp <- sd(x)
+  cv <- 100*dp/media
+  MIN <- min(x)
+  MAX <- max(x)
+  q1 <- quantile(x,0.25)
+  q3 <- quantile(x,0.75)
+  assi <- agricolae::skewness(x)
+  curt <- agricolae::kurtosis(x)
+  c(Mínimo = MIN, Q1=q1, Média=media, Med=mediana, Q3=q3, Máximo=MAX,
+    DesvPad = dp, CV = cv,Assimetria=assi,Curtose=curt)
+}
+apply(dados[7:length(dados)], 2, estat_desc)
+```
+
+# Gráficos de histograma
+
+```{r}
+dados %>% 
+  filter(!is.na(TeorH2O)) %>% 
+  group_by(Estacao) %>% 
+  ggplot(aes(x=TeorH2O)) +
+  geom_histogram(bins=30,color="black",fill="gray")+
+  facet_wrap(~Estacao + Profundidade, nrow = 3, scales = "free")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45))
+```
 
