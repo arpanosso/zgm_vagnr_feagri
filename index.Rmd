@@ -9,8 +9,8 @@ output: html_document
 
 ```{r, message=FALSE}
 library(tidyverse)
+library(vegan)
 ```
-
 
 # Entrada de dados
 ```{r}
@@ -58,3 +58,47 @@ dados %>%
   theme(axis.text.x = element_text(angle = 45))
 ```
 
+
+# Dados de Macrofauna
+
+```{r}
+macrofauna <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Macrofauna_edafica_dados_gerais_analises.txt", 
+                         h=TRUE,
+                         sep="\t")
+glimpse(macrofauna)
+```
+
+# Gráficos de contagem
+```{r}
+macrofauna %>% 
+  group_by(Estacao,Tratamento,Classe) %>% 
+  summarise(contagem =n()) %>% 
+  ggplot(aes(x=Tratamento, y=contagem,fill=Classe))+
+  geom_col() + 
+  facet_wrap(~Estacao,scale="free") +
+  theme_minimal() +
+  coord_flip()
+```
+
+```{r}
+macrofauna %>% 
+  group_by(Estacao,Grupo) %>% 
+  summarise(count =n()) %>% 
+  ggplot(aes(x=Estacao, y=count,fill=Grupo))+
+  geom_col(position = "dodge") + 
+  theme_minimal()
+```
+
+
+# Gráficos de histograma
+
+```{r}
+macrofauna %>% 
+  filter(!is.na(Tar)) %>% 
+  group_by(Estacao) %>% 
+  ggplot(aes(x=Tar)) +
+  geom_histogram(bins=30,color="black",fill="gray")+
+  facet_wrap(~Estacao + Profund, nrow = 3, scales = "free")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45))
+```
