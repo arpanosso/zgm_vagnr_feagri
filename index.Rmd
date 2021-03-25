@@ -69,14 +69,15 @@ glimpse(macrofauna)
 ```
 
 # Gráficos de contagem
-```{r}
+```{r,message=FALSE}
 macrofauna %>% 
   group_by(Estacao,Tratamento,Classe) %>% 
   summarise(contagem =n()) %>% 
-  ggplot(aes(x=Tratamento, y=contagem,fill=Classe))+
-  geom_col() + 
-  facet_wrap(~Estacao,scale="free") +
-  theme_minimal() +
+  mutate(perc = contagem/sum(contagem)) %>% 
+  ggplot(aes(x=Tratamento, y=perc, fill=Classe))+
+  geom_col(position = "dodge") + 
+  facet_wrap(~Estacao, scale="free") +
+  theme_minimal()+
   coord_flip()
 ```
 
