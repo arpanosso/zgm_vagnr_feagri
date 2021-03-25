@@ -7,7 +7,7 @@ output: html_document
 
 # Carregando Pacotes
 
-```{r, message=FALSE}
+```{r, message=FALSE,error=FALSE}
 library(tidyverse)
 library(vegan)
 ```
@@ -62,9 +62,8 @@ dados %>%
 # Dados de Macrofauna
 
 ```{r}
-macrofauna <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Macrofauna_edafica_dados_gerais_analises.txt", 
-                         h=TRUE,
-                         sep="\t")
+macrofauna <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Macrofauna_edafica_dados_gerais_analises.txt", h=TRUE,
+                sep="\t")
 glimpse(macrofauna)
 ```
 
@@ -103,3 +102,32 @@ macrofauna %>%
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 45))
 ```
+
+
+```{r,message=FALSE,error=FASLE}
+glimpse(macrofauna)
+gerais<-dados %>% 
+          filter(Profundidade != "1m_solo", Profundidade != "0.20-0.30") %>% 
+          group_by(Coleta, Estacao, Tratamento, Ponto, Profundidade) %>% 
+          summarise(TeorH2O=mean(TeorH2O),    AT=mean(AT),          DP=mean(DP),            DS =mean(DS),          
+                    Ma=mean(Ma),              Mi=mean(Mi),          PTotal=mean(PTotal),    RP  =mean(RP),         
+                    P_res=mean(P_res),        pH=mean(pH),          K=mean(K),              Ca =mean(Ca),          
+                    Mg=mean(Mg),              H_Al=mean(H_Al),      Al=mean(Al),            SB=mean(SB),
+                    CTC=mean(CTC),            V=mean(V),            Ca_CTC=mean(Ca_CTC),    Mg_CTC  =mean(Mg_CTC),     
+                    M_Sat_Al=mean(M_Sat_Al),  Est_C=mean(Est_C),    T_Ar=mean(T_Ar),        RH =mean(RH),          
+                    WBT=mean(WBT),            Ab_Abs=mean(Ab_Abs))
+```
+
+
+```{r,message=FALSE,error=FASLE}
+macro <- macrofauna %>% 
+          filter(Profund != "0.20-0.30") %>%
+          group_by(Col, Estacao, Tratamento, Ponto, Profund) %>%
+          summarise(Tar1m=mean(Tar1m),Rh1m=mean(Rh1m),Wbt1m=mean(Wbt1m),
+                    Tar=mean(Tar),Rh=mean(Rh),Wbt=mean(Wbt))
+```
+
+```{r}
+left_join(macro,gerais)
+```
+

@@ -1,4 +1,4 @@
-Ind	Classe	Ordem	Subordem	Grupo	GF	Tratamento	Col	Estacao	Data	Hora	Lat	Long	Ponto	Tar1m	Rh1m	Wbt1m	Profund	Tar	Rh	Wbt
+Ind	Classe	Ordem	Subordem	Grupo	GF	Tratamento	Coleta	Estacao	Data	Hora	Lat	Long	Ponto	Tar1m	Rh1m	Wbt1m	Profundidade	Tar	Rh	Wbt
 1	Insecta	Hymenoptera	NA	Formiga	PP	SAF	1	Primavera	26_09_2018	10_00	22_13_09.5	47_45_26.6	P1	24	69.6	20.6	COB	31	54	22.6
 1	Insecta	Blattodea	Blattaria	Barata	DD	SAF	1	Primavera	26_09_2018	10_00	22_13_09.5	47_45_26.6	P1	24	69.6	20.6	COB	31	54	22.6
 1	Clitellata	Haplotaxida	NA	Minhoca	GB	SAF	1	Primavera	26_09_2018	10_00	22_13_09.5	47_45_26.6	P1	24	69.6	20.6	0.00-0.10	0.0	0.0	0.0
