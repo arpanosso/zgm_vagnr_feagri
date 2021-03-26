@@ -64,6 +64,8 @@ dados %>%
 ```{r}
 macrofauna <- read.table("https://raw.githubusercontent.com/arpanosso/zgm_vagnr_feagri/main/dados/Macrofauna_edafica_dados_gerais_analises.txt", h=TRUE,
                 sep="\t")
+macrofauna <- macrofauna %>%  mutate(Estacao = ifelse(Estacao=="Verão","Verao",Estacao),
+                                     Tratamento = ifelse(Tratamento=="Pastagem","Pasto",Tratamento))
 glimpse(macrofauna)
 ```
 
@@ -98,14 +100,13 @@ macrofauna %>%
   group_by(Estacao) %>% 
   ggplot(aes(x=Tar)) +
   geom_histogram(bins=30,color="black",fill="gray")+
-  facet_wrap(~Estacao + Profund, nrow = 3, scales = "free")+
+  facet_wrap(~Estacao + Profundidade, nrow = 3, scales = "free")+
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 45))
 ```
 
 
 ```{r,message=FALSE,error=FASLE}
-glimpse(macrofauna)
 gerais<-dados %>% 
           filter(Profundidade != "1m_solo", Profundidade != "0.20-0.30") %>% 
           group_by(Coleta, Estacao, Tratamento, Ponto, Profundidade) %>% 
@@ -121,13 +122,129 @@ gerais<-dados %>%
 
 ```{r,message=FALSE,error=FASLE}
 macro <- macrofauna %>% 
-          filter(Profund != "0.20-0.30") %>%
-          group_by(Col, Estacao, Tratamento, Ponto, Profund) %>%
+          filter(Profundidade != "0.20-0.30") %>%
+          group_by(Coleta, Estacao, Tratamento, Ponto, Profundidade) %>%
           summarise(Tar1m=mean(Tar1m),Rh1m=mean(Rh1m),Wbt1m=mean(Wbt1m),
                     Tar=mean(Tar),Rh=mean(Rh),Wbt=mean(Wbt))
 ```
 
 ```{r}
-left_join(macro,gerais)
+df<-left_join(macro,gerais %>% select(-RP), by = c("Coleta", "Estacao", "Tratamento", "Ponto", "Profundidade"))
 ```
 
+### Análise de correlação  
+
+```{r}
+prof<-levels(as.factor(df$Profundidade))
+for(i in 1:4){
+  for(j in 1:length(prof)){
+      df  %>%  ungroup() %>%  
+          filter(Coleta == i, Profundidade == prof[j]) %>% 
+          select(-Coleta, -Estacao, - Tratamento, - Ponto, - Profundidade) %>% 
+          cor() %>% 
+          corrplot::corrplot(method="ellipse",type="upper",mar=c(0,0,1,0),
+                             title = paste0("Coleta:",i,"; Profundidade: ", j))
+  }
+}
+```
+
+## Análise de agrupamento hierárquico  
+```{r}
+### Padronizando as variáveis 
+      da_pad<-df   %>%  ungroup() %>% 
+          select(-Coleta, -Estacao, - Tratamento, - Ponto, - Profundidade ) %>% 
+          decostand(method = "standardize",na.rm=TRUE)
+      da_pad_euc<-vegdist(da_pad,"euclidean")
+      da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
+      rotulos<-df$Tratamento
+
+            # Plotando do dendrograma
+      plot(da_pad_euc_ward, 
+           ylab="Distância Euclidiana",
+           xlab="Acessos",
+          # main=paste0("Dendrograma - Prof:",i,"; Dia: ", j),
+           hang=-1,
+           col="blue",
+           las=1,
+           cex=.6,
+           labels = rotulos,
+           lwd=1.5);box()
+
+            # Plotando o Heatmap
+      dend<-as.dendrogram(da_pad_euc_ward)
+      heatmap(as.matrix(da_pad_euc),
+        Rowv=dend,
+        symm = TRUE,main=paste0("Heatmap - Prof:",i,"; Dia: ", j),
+        margin=c(3,3),
+        labRow =rotulos,
+        labCol=rotulos)
+```
+
+### Análise de Componentes principais (PCA)
+
+```{r}
+      da<-df %>% ungroup() %>% 
+          select(-Coleta, -Estacao, - Tratamento, - Ponto, - Profundidade )
+      pca <-  prcomp(da,scale.=T)
+      print(paste0("------- ACP - Prof:",i,"; Dia: ", j,"----------"))
+      print("Autovalores ---")
+      eig<-pca$sdev^2
+      print(round(eig,6))
+      cat("\n")
+      print("% da variância explicada ---")
+      ve<-eig/sum(eig)
+      print(round(ve,6)*100)
+      cat("\n")
+      print("% da variância acumulada ---")
+      print(cumsum(ve)*100)
+      mcor<-cor(da,pca$x) 
+      mcor %>% 
+      corrplot::corrplot(mar=c(0,0,1,0))
+      screeplot(pca);abline(h=1,lty=2)
+
+            # Construção do biplot usando as funções básicas
+      pc1V<-cor(da,pca$x)[,1]/sd(cor(da,pca$x)[,1])
+      pc2V<-cor(da,pca$x)[,2]/sd(cor(da,pca$x)[,2])
+      pc1c<-pca$x[,1]/sd(pca$x[,1])
+      pc2c<-pca$x[,2]/sd(pca$x[,2])
+      rotulos<-df$Tratamento
+      Agrupamento<-as.factor(rotulos)
+      bip<-data.frame(pc1c,pc2c,Agrupamento)
+      texto <- data.frame(
+        x = pc1V,
+        y = pc2V,
+        label = names(da))
+
+      p<-bip %>% ggplot(aes(x=pc1c,y=pc2c,color=Agrupamento))+
+        geom_point(aes(shape =Agrupamento, color = Agrupamento), size = 2)+ 
+        theme_minimal()+
+        geom_vline(aes(xintercept=0),
+                   color="black", size=1)+
+        geom_hline(aes(yintercept=0),
+                   color="black", size=1)+
+        annotate(geom="segment",
+                 x=rep(0,length(da)),
+                 xend=texto$x,
+                 y=rep(0,length(da)),
+                 yend=texto$y,color="black",lwd=.5)+
+        geom_label(data=texto,aes(x=x,y=y,label=label),
+                  color="black",angle=0,fontface="bold",size=4,fill="white")+
+        labs(x=paste("CP1 (",round(100*ve[1],2),"%)",sep=""),
+             y=paste("CP2 (",round(100*ve[2],2),"%)",sep=""),
+             title = paste0("Prof:",i,"; Dia:", j) )+
+        theme(legend.position = "bottom") +
+        theme(plot.title = element_text(hjust = 0.5))
+        print(p)
+
+       cat("\n")
+       print( "Tabela das correlações com as PCs---")
+       ck<-sum(pca$sdev^2>=1)
+       tabelapca<-vector()
+       for( l in 1:ck) tabelapca<-cbind(tabelapca,mcor[,l]) 
+        colnames(tabelapca)<-paste(rep(c("PC"),ck),1:ck,sep="")
+        pcat<-round(tabelapca,3)
+        tabelapca<-tabelapca[order(abs(tabelapca[,1])),]
+        print(tabelapca)
+        cat("\n")
+
+```
