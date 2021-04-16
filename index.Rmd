@@ -30,6 +30,7 @@ dados <- dados %>% mutate(DSR = ABS/sum(ABS)*100,
                           season = ifelse(Coleta <=2, "Dry","Rainy"))
 glimpse(dados)
 ```
+
 # Análise de Variância
 
 ### Sem considerar estações
@@ -107,6 +108,27 @@ print(tabelapca)
 cat("\n")
 ```
 
+
+```{r}
+ da_pad<- da %>% 
+           decostand(method = "standardize",na.rm=TRUE)
+ da_pad_euc<-vegdist(da_pad,"euclidean")
+ da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
+ plot(da_pad_euc_ward,ylab="Distância Euclidiana",xlab="Acessos",
+            hang=-1,col="blue",las=1,cex=.6,labels = rotulos,lwd=1.5);box()
+
+# # Plotando o Heatmap
+dend<-as.dendrogram(da_pad_euc_ward)
+       heatmap(as.matrix(da_pad_euc),
+         Rowv=dend,
+         symm = TRUE,
+         margin=c(3,3),
+         labRow =rotulos,
+         labCol=rotulos)
+```
+
+
+
 ### Dry
 
 ```{r}
@@ -148,37 +170,21 @@ print(tabelapca)
 cat("\n")
 ```
 
-## Análise de agrupamento hierárquico  
-```{r}
-# rotulos <- dados  %>%   
-#           filter(season==Est, Profundidade == Prof) %>% 
-#           pull(Tratamento)
-#     
-# da_pad<-dados  %>%   
-#           filter(season==Est, Profundidade == Prof) %>% 
-#           ungroup() %>% 
-#           select(-Coleta, -Estacao, - Tratamento, - Ponto, -Pontos, - Profundidade, - season, - Tar, - RH, - WBT) %>% 
-#           decostand(method = "standardize",na.rm=TRUE)
-# da_pad_euc<-vegdist(da_pad,"euclidean")
-# da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
-```
-
 
 ```{r}
-# Plotando do dendrograma
-# plot(da_pad_euc_ward,ylab="Distância Euclidiana",xlab="Acessos",main=paste0(Est,"; ", Prof,sep=""),
-#            hang=-1,col="blue",las=1,cex=.6,labels = rotulos,lwd=1.5);box()
-```
+ da_pad<- da %>% 
+           decostand(method = "standardize",na.rm=TRUE)
+ da_pad_euc<-vegdist(da_pad,"euclidean")
+ da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
+ plot(da_pad_euc_ward,ylab="Distância Euclidiana",xlab="Acessos",
+            hang=-1,col="blue",las=1,cex=.6,labels = rotulos,lwd=1.5);box()
 
-
-```{r}
 # # Plotando o Heatmap
-#       dend<-as.dendrogram(da_pad_euc_ward)
-#       heatmap(as.matrix(da_pad_euc),
-#         Rowv=dend,
-#         symm = TRUE,main=paste0(Est,"; ", Prof,sep=""),
-#         margin=c(3,3),
-#         labRow =rotulos,
-#         labCol=rotulos)
+dend<-as.dendrogram(da_pad_euc_ward)
+       heatmap(as.matrix(da_pad_euc),
+         Rowv=dend,
+         symm = TRUE,
+         margin=c(3,3),
+         labRow =rotulos,
+         labCol=rotulos)
 ```
-
