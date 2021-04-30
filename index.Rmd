@@ -30,6 +30,25 @@ dados <- dados %>% mutate(DSR = ABS/sum(ABS)*100,
                           season = ifelse(Coleta <=2, "Dry","Rainy"))
 glimpse(dados)
 ```
+# Gráfico DSR
+
+```{r}
+dados %>% 
+  group_by(season) %>% 
+  ggplot(aes(x=Tratamento,y=DSR,fill=Tratamento)) + 
+  geom_boxplot()+
+  facet_wrap(~season) +
+  theme_bw()
+```
+
+```{r}
+dados %>% 
+  group_by(season) %>% 
+  ggplot(aes(x=Tratamento,y=DSR,fill=Tratamento)) + 
+  geom_boxplot()+
+  facet_wrap(~season+Profundidade,nrow=2) +
+  theme_bw()
+```
 
 # Análise de Variância
 
@@ -47,6 +66,8 @@ for(i in 4:length(df)){
  ExpDes.pt::dic(trat,y)
  print(cat("\n"))
 }
+
+# adição dos resíduos para cada variavel e boxplot dos tratamento
 ```
 
 ### Por estações
